@@ -125,7 +125,7 @@ public:
                     victim->ModifyMoney(-VictimLoot);
 
                     // Inform the player of the corpse loot
-                    Notify(player, victim, NULL, "Loot", NULL, VictimLoot);
+                    Notify(player, victim, NULL, "Loot", 0, VictimLoot);
 
                     // Pay the player the additional PVP bounty
                     player->ModifyMoney(BountyAmount);
@@ -218,7 +218,7 @@ public:
             player->ModifyMoney(bounty);
 
             // Inform the player of the bounty amount
-            Notify(player, NULL, killed, KillType, bounty, NULL);
+            Notify(player, NULL, killed, KillType, bounty, 0);
         }
         else
         {
@@ -238,7 +238,7 @@ public:
                         playerInGroup->ModifyMoney(bounty);
 
                         // Inform the player of the bounty amount
-                        Notify(playerInGroup, NULL, killed, KillType, bounty, NULL);
+                        Notify(playerInGroup, NULL, killed, KillType, bounty, 0);
                     }
                     else
                     {
@@ -249,7 +249,7 @@ public:
                             playerInGroup->ModifyMoney(bounty);
 
                             // Inform the player of the bounty amount
-                            Notify(playerInGroup, NULL, killed, KillType, bounty, NULL);
+                            Notify(playerInGroup, NULL, killed, KillType, bounty, 0);
                         }
                     }
                 }
@@ -391,7 +391,30 @@ public:
     }
 };
 
+class MoneyForKillsWorld : public WorldScript
+{
+public:
+    MoneyForKillsWorld() : WorldScript("MoneyForKillsWorld") { }
+
+    void OnBeforeConfigLoad(bool reload) override
+    {
+        if (!reload) {
+            std::string conf_path = _CONF_DIR;
+            std::string cfg_file = conf_path + "/mod_moneyforkills.conf";
+            
+			#ifdef WIN32
+			cfg_file = "mod_moneyforkills.conf";
+			#endif
+			
+			std::string cfg_def_file = cfg_file + ".dist";
+            sConfigMgr->LoadMore(cfg_def_file.c_str());
+            sConfigMgr->LoadMore(cfg_file.c_str());
+        }
+    }
+};
+
 void AddMoneyForKillsScripts()
 {
     new MoneyForKills();
+	new MoneyForKillsWorld();
 }
