@@ -31,12 +31,12 @@ reward range of the group and an option to only reward the player that got the k
 - Type: Server/Player
 - Script: MoneyForKills
 - Config: Yes
-    - Enable/Disable Module
-    - Enable Module Announce
-    - Enable Killing Blow Only Bounty
-    - Enable Bounty for Players Outside Reward Area
-    - Set % of Gold Looted from victim on PVP kill
-    - Set Bounty Multipliers for each type of kill
+- Enable/Disable Module
+- Enable Module Announce
+- Enable Killing Blow Only Bounty
+- Enable Bounty for Players Outside Reward Area
+- Set % of Gold Looted from victim on PVP kill
+- Set Bounty Multipliers for each type of kill
 - SQL: No
 
 
@@ -280,7 +280,7 @@ public:
                 victimMsg.append(killer->GetName()).append(" rifles through your corpse and takes").append(rewardVal);
                 victimMsg.append(".");
                 ChatHandler(victim->GetSession()).SendSysMessage(victimMsg.c_str());
-                break;     
+                break;
             case KILLTYPE_PVP:
                 rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
                 rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
@@ -292,10 +292,13 @@ public:
                 rewardMsg.clear();
                 break;
             case KILLTYPE_WORLDBOSS:
-                rewardMsg.append("|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 ").append(killer->GetName());
-                rewardMsg.append("'s|r group triumphed victoriously over |CFF18BE00[").append(killed->GetName()).append("]|r !");
-                sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
-                rewardMsg.clear();
+                if (sConfigMgr->GetBoolDefault("MFK.WorldBossAnnounce", true))
+                {
+                    rewardMsg.append("|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 ").append(killer->GetName());
+                    rewardMsg.append("'s|r group triumphed victoriously over |CFF18BE00[").append(killed->GetName()).append("]|r !");
+                    sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+                    rewardMsg.clear();
+                }
                 break;
             case KILLTYPE_MOB:
                 break;
@@ -303,11 +306,10 @@ public:
 
         if (kType != KILLTYPE_PVP)
         {
-            
             rewardMsg.append(" You receive a bounty of");
             rewardMsg.append(rewardVal);
-            ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
             rewardMsg.append(" for the kill.");
+            ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
         }
     }
 
@@ -338,12 +340,12 @@ public:
         if (!reload) {
             std::string conf_path = _CONF_DIR;
             std::string cfg_file = conf_path + "/mod_moneyforkills.conf";
-            
-			#ifdef WIN32
-			cfg_file = "mod_moneyforkills.conf";
-			#endif
-			
-			std::string cfg_def_file = cfg_file + ".dist";
+
+#ifdef WIN32
+            cfg_file = "mod_moneyforkills.conf";
+#endif
+
+            std::string cfg_def_file = cfg_file + ".dist";
             sConfigMgr->LoadMore(cfg_def_file.c_str());
             sConfigMgr->LoadMore(cfg_file.c_str());
         }
@@ -353,5 +355,5 @@ public:
 void AddMoneyForKillsScripts()
 {
     new MoneyForKills();
-	new MoneyForKillsWorld();
+    new MoneyForKillsWorld();
 }
