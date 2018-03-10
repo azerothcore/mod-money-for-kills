@@ -73,6 +73,15 @@ reward range of the group and an option to only reward the player that got the k
 #include "Config.h"
 #include "Group.h"
 
+enum KillType
+{
+    KILLTYPE_LOOT,
+    KILLTYPE_PVP,
+    KILLTYPE_DUNGEONBOSS,
+    KILLTYPE_WORLDBOSS,
+    KILLTYPE_MOB
+};
+
 class MoneyForKills : public PlayerScript
 {
 public:
@@ -90,7 +99,7 @@ public:
     }
 
     // Player Kill Reward
-    void OnPVPKill(Player* player, Player* victim)
+    void OnPVPKill(Player* killer, Player* victim)
     {
         // If enabled...
         if (sConfigMgr->GetBoolDefault("MFK.Enable", true))
@@ -101,13 +110,14 @@ public:
             if (PVPMultiplier > 0)
             {
                 // No reward for killing yourself
-                if (player->GetGUID() == victim->GetGUID())
+                if (killer->GetGUID() == victim->GetGUID())
                 {
                     // Inform the world
-                    std::ostringstream ss;
-                    ss << "|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 " << player->GetName() << " met an untimely demise!";
-                    sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
+                    std::string message = "|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ";
+                    message.append(killer->GetName());
+                    message.append(" met an untimely demise!");
 
+                    sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
                     return;
                 }
 
@@ -117,27 +127,22 @@ public:
                 const int VictimLoot = (victim->GetMoney() * PVPCorpseLootPercent) / 100;
                 const int BountyAmount = ((VictimLevel * PVPMultiplier) / 3);
 
+                // Pay the player the additional PVP bounty
+                killer->ModifyMoney(BountyAmount);
+
                 // Rifle the victim's corpse for loot
                 if (victim->GetMoney() >= 10000)
                 {
-                    // Player loots 5% of the victim's gold
-                    player->ModifyMoney(VictimLoot);
+                    // Player loots a percentage of the victim's gold
+                    killer->ModifyMoney(VictimLoot);
                     victim->ModifyMoney(-VictimLoot);
 
                     // Inform the player of the corpse loot
-                    Notify(player, victim, NULL, "Loot", 0, VictimLoot);
-
-                    // Pay the player the additional PVP bounty
-                    player->ModifyMoney(BountyAmount);
-                }
-                else
-                {
-                    // Pay the player the additional PVP bounty
-                    player->ModifyMoney(BountyAmount);
+                    Notify(killer, victim, nullptr, KILLTYPE_LOOT, VictimLoot);
                 }
 
                 // Inform the player of the bounty amount
-                Notify(player, victim, NULL, "PVP", BountyAmount, VictimLoot);
+                Notify(killer, victim, nullptr, KILLTYPE_PVP, BountyAmount);
 
                 return;
             }
@@ -177,12 +182,12 @@ public:
                     if (killed->IsDungeonBoss())
                     {
                         // Pay the bounty amount
-                        CreatureBounty(player, killed, "DungeonBoss", BountyAmount);
+                        CreatureBounty(player, killed, KILLTYPE_DUNGEONBOSS, BountyAmount);
                     }
                     else
                     {
                         // Pay the bounty amount
-                        CreatureBounty(player, killed, "WorldBoss", BountyAmount);
+                        CreatureBounty(player, killed, KILLTYPE_WORLDBOSS, BountyAmount);
                     }
                 }
             }
@@ -197,14 +202,14 @@ public:
                     const int BountyAmount = ((CreatureLevel * KillMultiplier) / 3);
 
                     // Pay the bounty amount
-                    CreatureBounty(player, killed, "MOB", BountyAmount);
+                    CreatureBounty(player, killed, KILLTYPE_MOB, BountyAmount);
                 }
             }
         }
     }
 
     // Pay Creature Bounty
-    void CreatureBounty(Player* player, Creature* killed, string KillType, int bounty)
+    void CreatureBounty(Player* player, Creature* killed, KillType kType, int bounty)
     {
         Group* group = player->GetGroup();
         Group::MemberSlotList const &members = group->GetMemberSlots();
@@ -218,7 +223,7 @@ public:
             player->ModifyMoney(bounty);
 
             // Inform the player of the bounty amount
-            Notify(player, NULL, killed, KillType, bounty, 0);
+            Notify(player, nullptr, killed, kType, bounty);
         }
         else
         {
@@ -238,7 +243,7 @@ public:
                         playerInGroup->ModifyMoney(bounty);
 
                         // Inform the player of the bounty amount
-                        Notify(playerInGroup, NULL, killed, KillType, bounty, 0);
+                        Notify(playerInGroup, nullptr, killed, kType, bounty);
                     }
                     else
                     {
@@ -249,7 +254,7 @@ public:
                             playerInGroup->ModifyMoney(bounty);
 
                             // Inform the player of the bounty amount
-                            Notify(playerInGroup, NULL, killed, KillType, bounty, 0);
+                            Notify(playerInGroup, nullptr, killed, kType, bounty);
                         }
                     }
                 }
@@ -257,137 +262,69 @@ public:
         }
     }
 
-    // Payment/Kill Notification
-    void Notify(Player* player, Player* victim, Creature* killed, string KillType, int bounty, int loot)
+    void Notify(Player * killer, Player * victim, Creature * killed, KillType kType, int reward)
     {
-        std::ostringstream ss;
-        std::ostringstream sv;
-        int result[3];
+        int rewardBreakdown[3];
+        rewardBreakdown[0] = reward / 10000;
+        reward = reward - rewardBreakdown[0] * 10000;
+        rewardBreakdown[1] = reward / 100;
+        rewardBreakdown[2] = reward - (rewardBreakdown[1] * 100);
 
-        // Determine type of kill
-        if (KillType == "Loot")
+        std::string rewardMsg = "";
+        std::string victimMsg = "";
+        std::string rewardVal = BuildRewardString(&rewardBreakdown[0]);
+        switch (kType)
         {
-            const int copper = loot % 100;
-            loot = (loot - copper) / 100;
-            const int silver = loot % 100;
-            const int gold = (loot - silver) / 100;
-            result[0] = copper;
-            result[1] = silver;
-            result[2] = gold;
-        }
-        else
-        {
-            const int copper = bounty % 100;
-            bounty = (bounty - copper) / 100;
-            const int silver = bounty % 100;
-            const int gold = (bounty - silver) / 100;
-            result[0] = copper;
-            result[1] = silver;
-            result[2] = gold;
-        }
-
-        // Payment notification
-        if (KillType == "Loot")
-        {
-            ss << "You loot ";
-            sv << player->GetName() << " rifles through your corpse and takes ";
-        }
-        else if (KillType == "PVP")
-        {
-            ss << "|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 " << player->GetName() << " |cffFF0000has slain " << victim->GetName() << " earning a bounty of ";
-        }
-        else
-        {
-            ss << "You receive a bounty of ";
+            case KILLTYPE_LOOT:
+                rewardMsg.append("You loot").append(rewardVal).append(" from the corpse.");
+                victimMsg.append(killer->GetName()).append(" rifles through your corpse and takes").append(rewardVal);
+                victimMsg.append(".");
+                ChatHandler(victim->GetSession()).SendSysMessage(victimMsg.c_str());
+                break;     
+            case KILLTYPE_PVP:
+                rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
+                rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
+                sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+                break;
+            case KILLTYPE_DUNGEONBOSS:
+                rewardMsg.append("|cffFF8000Your group has defeated |cffFF0000").append(killed->GetName()).append("|cffFF8000.");
+                ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
+                rewardMsg.clear();
+                break;
+            case KILLTYPE_WORLDBOSS:
+                rewardMsg.append("|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 ").append(killer->GetName());
+                rewardMsg.append("'s|r group triumphed victoriously over |CFF18BE00[").append(killed->GetName()).append("]|r !");
+                sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+                rewardMsg.clear();
+                break;
+            case KILLTYPE_MOB:
+                break;
         }
 
-        // Figure out the money (todo: find a better way to handle the different strings)
-        if (result[2] > 0)
+        if (kType != KILLTYPE_PVP)
         {
-            ss << result[2] << " gold";
-            sv << result[2] << " gold";
+            
+            rewardMsg.append(" You receive a bounty of");
+            rewardMsg.append(rewardVal);
+            ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
+            rewardMsg.append(" for the kill.");
         }
-        if (result[1] > 0)
-        {
-            if (result[2] > 0)
-            {
-                ss << " " << result[1] << " silver";
-                sv << " " << result[1] << " silver";
-            }
-            else
-            {
-                ss << result[1] << " silver";
-                sv << result[1] << " silver";
+    }
 
-            }
-        }
-        if (result[0] > 0)
+    std::string BuildRewardString(int * reward)
+    {
+        std::string currSymbol[3] = { " gold", " silver", " copper" };
+        std::string rewardMsg = "";
+        for (int i = 0; i < 3; i++)
         {
-            if (result[1] > 0)
+            if (reward[i] > 0)
             {
-                ss << " " << result[0] << " copper";
-                sv << " " << result[0] << " copper";
-            }
-            else
-            {
-                ss << result[0] << " copper";
-                sv << result[0] << " copper";
+                rewardMsg.append(" ").append(std::to_string(reward[i]));
+                rewardMsg.append(currSymbol[i]);
             }
         }
 
-        // Type of kill
-        if (KillType == "Loot")
-        {
-            ss << " from the corpse.";
-            sv << ".";
-        }
-        else if (KillType == "PVP")
-        {
-            ss << ".";
-            sv << ".";
-        }
-        else
-        {
-            ss << " for the kill.";
-        }
-
-        // If it's a boss kill..
-        if (KillType == "WorldBoss")
-        {
-            // Inform the world of the kill
-            std::ostringstream sw;
-            sw << "|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 " << player->GetName() << "'s|r group triumphed victoriously over |CFF18BE00[" << killed->GetName() << "]|r !";
-            sWorld->SendServerMessage(SERVER_MSG_STRING, sw.str().c_str());
-
-            // Inform the player of the bounty
-            ChatHandler(player->GetSession()).SendSysMessage(ss.str().c_str());
-        }
-        else if (KillType == "Loot")
-        {
-            // Inform the player of the corpse loot
-            ChatHandler(player->GetSession()).SendSysMessage(ss.str().c_str());
-
-            // Inform the victim of the corpse loot
-            ChatHandler(victim->GetSession()).SendSysMessage(sv.str().c_str());
-        }
-        else if (KillType == "PVP")
-        {
-            // Inform the world of the kill
-            sWorld->SendServerMessage(SERVER_MSG_STRING, ss.str().c_str());
-        }
-        else
-        {
-            if (KillType == "DungeonBoss")
-            {
-                // Inform the player of the Dungeon Boss kill
-                std::ostringstream sb;
-                sb << "|cffFF8000Your group has defeated |cffFF0000" << killed->GetName() << "|cffFF8000.";
-                ChatHandler(player->GetSession()).SendSysMessage(sb.str().c_str());
-            }
-
-            // Inform the player of the bounty
-            ChatHandler(player->GetSession()).SendSysMessage(ss.str().c_str());
-        }
+        return rewardMsg;
     }
 };
 
