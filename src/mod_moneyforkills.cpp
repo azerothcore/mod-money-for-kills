@@ -110,7 +110,7 @@ public:
             if (PVPMultiplier > 0)
             {
                 // No reward for killing yourself
-                if (killer->GetGUID() == victim->GetGUID())
+                if (killer->GetGUID() == victim->GetGUID() && sConfigMgr->GetBoolDefault("MFK.SuicideAnnounce", true))
                 {
                     // Inform the world
                     std::string message = "|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ";
@@ -282,14 +282,21 @@ public:
                 ChatHandler(victim->GetSession()).SendSysMessage(victimMsg.c_str());
                 break;
             case KILLTYPE_PVP:
-                rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
-                rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
-                sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+                if (sConfigMgr->GetBoolDefault("MFK.PvPAnnounce", true))
+                {
+                    rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
+                    rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
+                    sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+                }
+                
                 break;
             case KILLTYPE_DUNGEONBOSS:
-                rewardMsg.append("|cffFF8000Your group has defeated |cffFF0000").append(killed->GetName()).append("|cffFF8000.");
-                ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
-                rewardMsg.clear();
+                if (sConfigMgr->GetBoolDefault("MFK.DungeonBossAnnounce", true))
+                {
+                    rewardMsg.append("|cffFF8000Your group has defeated |cffFF0000").append(killed->GetName()).append("|cffFF8000.");
+                    ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
+                    rewardMsg.clear();
+                }     
                 break;
             case KILLTYPE_WORLDBOSS:
                 if (sConfigMgr->GetBoolDefault("MFK.WorldBossAnnounce", true))
