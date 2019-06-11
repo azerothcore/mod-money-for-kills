@@ -342,7 +342,6 @@ public:
                     {
                         Group::MemberSlotList const& members = group->GetMemberSlots();
 
-                        // Pay the group (OnCreatureKill only rewards the player that got the killing blow)
                         for (auto itr = members.begin(); itr != members.end(); ++itr)
                         {
                             Player* playerInGroup = ObjectAccessor::FindPlayer((*itr).guid);
