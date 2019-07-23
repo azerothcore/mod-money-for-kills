@@ -3,7 +3,7 @@
 ### This is a module for [AzerothCore](http://www.azerothcore.org)
 - Latest build status with azerothcore: [![Build Status](https://travis-ci.org/azerothcore/mod-money-for-kills.svg?branch=master)](https://travis-ci.org/azerothcore/mod-money-for-kills)
 #### Features:
-- Money for Kills for Azerothcore
+- Money for Kills and kill announcer for Azerothcore
 
 ### This module currently requires:
 - AzerothCore v1.0.1+
