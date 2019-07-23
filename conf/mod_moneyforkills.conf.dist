@@ -12,7 +12,7 @@ MFK.Enable = 1
 # Announce the module when the player logs in?
 # Default: 1
 
-MFK.Announce = 1
+MFK.Announce = 0
 
 # Enable announcements to notify the server of a world boss kill
 # Default 1
@@ -74,7 +74,7 @@ MFK.PVP.CorpseLootPercent = 5
 # NOTE: There are many dungeon bosses per dungeon, so set accordingly! 
 # NOTE: A value of 0 will disable the payment type
 
-MFK.Bounty.Kill.Multiplier = 100
-MFK.PVP.Kill.Multiplier = 200
+MFK.Bounty.Kill.Multiplier = 10
+MFK.PVP.Kill.Multiplier = 20
 MFK.Bounty.DungeonBoss.Multiplier = 25
-MFK.Bounty.WorldBoss.Multiplier = 200
+MFK.Bounty.WorldBoss.Multiplier = 20
