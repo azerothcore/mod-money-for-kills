@@ -1,7 +1,8 @@
 # ![logo](https://raw.githubusercontent.com/azerothcore/azerothcore.github.io/master/images/logo-github.png) AzerothCore
 ## mod-money-for-kills 
 ### This is a module for [AzerothCore](http://www.azerothcore.org)
-- Latest build status with azerothcore: [![Build Status](https://travis-ci.org/azerothcore/mod-money-for-kills.svg?branch=master)](https://travis-ci.org/azerothcore/mod-money-for-kills)
+- Latest build status with azerothcore: [![Build Status](https://github.com/azerothcore/mod-money-for-kills/workflows/core-build/badge.svg?branch=master&event=push)](https://github.com/azerothcore/mod-money-for-kills)
+
 #### Features:
 - Money for Kills and kill announcer for Azerothcore
 
