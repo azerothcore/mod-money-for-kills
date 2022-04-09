@@ -2,7 +2,8 @@
 
 # Money For Kills #
 
-#### A module for AzerothCore by [StygianTheBest](https://github.com/StygianTheBest/AzerothCore-Content/tree/master/Modules)
+#### A module for AzerothCore (https://github.com/azerothcore/mod-money-for-kills)
+#### Originally by [StygianTheBest](https://github.com/StygianTheBest/AzerothCore-Content/tree/master/Modules)
 ------------------------------------------------------------------------------------------------------------------
 
 
@@ -42,6 +43,7 @@ reward range of the group and an option to only reward the player that got the k
 
 ### Version ###
 ------------------------------------------------------------------------------------------------------------------
+- v2022.04.09 - Fixed deprecation warnings
 - v2017.08.24 - Release
 - v2017.08.31 - Added boss kills
 - v2017.09.02 - Added distance check, Fixed group payment
