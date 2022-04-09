@@ -64,6 +64,7 @@ reward range of the group and an option to only reward the player that got the k
 - [OregonCore](https://wiki.oregon-core.net/)
 - [Wowhead.com](http://wowhead.com)
 - [AoWoW](https://wotlk.evowow.com/)
+- [SoulSeekkor](https://github.com/SoulSeekkor)
 
 
 ### License ###
