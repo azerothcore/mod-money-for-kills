@@ -110,9 +110,9 @@ public:
 
 	// Announce Module
 	void OnLogin(Player *player) {
-		if (sConfigMgr->GetBoolDefault(MFKEnable, true))
+		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
 		{
-			if (sConfigMgr->GetBoolDefault(MFKAnnounce, true))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounce, true))
 			{
 				ChatHandler(player->GetSession()).SendSysMessage("This server is running the |cff4CFF00MoneyForKills |rmodule.");
 			}
@@ -123,9 +123,9 @@ public:
 	void OnPVPKill(Player* killer, Player* victim)
 	{
 		// If enabled...
-		if (sConfigMgr->GetBoolDefault(MFKEnable, true))
+		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
 		{
-			const uint32 PVPMultiplier = sConfigMgr->GetIntDefault(MFKPVPKillMult, 0);
+			const uint32 PVPMultiplier = sConfigMgr->GetOption<uint32>(MFKPVPKillMult, 0);
 			const uint32 VictimLevel = victim->getLevel();
 
 			// If enabled...
@@ -147,7 +147,7 @@ public:
 			}
 
 			// Calculate the amount of gold to give to the victor
-			const uint32 PVPCorpseLootPercent = sConfigMgr->GetIntDefault(MFKPVPCorpseLootPercent, 5);
+			const uint32 PVPCorpseLootPercent = sConfigMgr->GetOption<uint32>(MFKPVPCorpseLootPercent, 5);
 			const int VictimLoot = (victim->GetMoney() * PVPCorpseLootPercent) / 100;
 
 			// Rifle the victim's corpse for loot
@@ -169,7 +169,7 @@ public:
 	void OnCreatureKill(Player* player, Creature* killed)
 	{
 		// If enabled...
-		if (sConfigMgr->GetBoolDefault(MFKEnable, true))
+		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
 		{
 			// Get the creature level
 			const uint32 CreatureLevel = killed->getLevel();
@@ -178,16 +178,16 @@ public:
 			KillType CreatureType;
 
 			if (killed->IsDungeonBoss()) {
-				BossMultiplier = sConfigMgr->GetIntDefault(MFKBountyKillDBMult, 0);
+				BossMultiplier = sConfigMgr->GetOption<uint32>(MFKBountyKillDBMult, 0);
 				CreatureType = KILLTYPE_DUNGEONBOSS;
 			}
 			else if (killed->isWorldBoss()) {
-				BossMultiplier = sConfigMgr->GetIntDefault(MFKBountyKillWBMult, 0);
+				BossMultiplier = sConfigMgr->GetOption<uint32>(MFKBountyKillWBMult, 0);
 				CreatureType = KILLTYPE_WORLDBOSS;
 			}
 			else
 			{
-				KillMultiplier = sConfigMgr->GetIntDefault(MFKBountyKillMult, 0);
+				KillMultiplier = sConfigMgr->GetOption<uint32>(MFKBountyKillMult, 0);
 				CreatureType = KILLTYPE_MOB;
 			}
 
@@ -223,7 +223,7 @@ public:
 	void CreatureBounty(Player* player, Creature* killed, KillType kType, int bounty)
 	{
 		Group* group = player->GetGroup();
-		const uint32 KillingBlowOnly = sConfigMgr->GetIntDefault(MFKBountyKillingBlow, 0);
+		const uint32 KillingBlowOnly = sConfigMgr->GetOption<uint32>(MFKBountyKillingBlow, 0);
 
 		// Determine who receives the bounty
 		if (!group || KillingBlowOnly == 1)
@@ -236,7 +236,7 @@ public:
 		}
 		else
 		{
-			const uint32 MoneyForNothing = sConfigMgr->GetIntDefault(MFKBountyMoneyForNothing, 0);
+			const uint32 MoneyForNothing = sConfigMgr->GetOption<uint32>(MFKBountyMoneyForNothing, 0);
 			Group::MemberSlotList const& members = group->GetMemberSlots();
 
 			// Pay the group (OnCreatureKill only rewards the player that got the killing blow)
@@ -293,7 +293,7 @@ public:
 			ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
 			break;
 		case KILLTYPE_PVP:
-			if (sConfigMgr->GetBoolDefault(MFKAnnouncePvP, true))
+			if (sConfigMgr->GetOption<bool>(MFKAnnouncePvP, true))
 			{
 				rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
 				rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
@@ -301,7 +301,7 @@ public:
 			}
 			break;
 		case KILLTYPE_DUNGEONBOSS:
-			if (sConfigMgr->GetBoolDefault(MFKAnnounceDungeonBoss, true))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounceDungeonBoss, true))
 			{
 				rewardMsg.append("|cffFF8000Your group has defeated |cffFF0000").append(killed->GetName()).append("|cffFF8000.");
 				ChatHandler(killer->GetSession()).SendSysMessage(rewardMsg.c_str());
@@ -309,7 +309,7 @@ public:
 			}
 			break;
 		case KILLTYPE_WORLDBOSS:
-			if (sConfigMgr->GetBoolDefault(MFKAnnounceWorldBoss, true))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounceWorldBoss, true))
 			{
 				rewardMsg.append("|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 ").append(killer->GetName());
 				rewardMsg.append("'s|r group triumphed victoriously over |CFF18BE00[").append(killed->GetName()).append("]|r !");
@@ -324,10 +324,10 @@ public:
 			message.append(killer->GetName());
 			message.append(" met an untimely demise!");
 
-			if (sConfigMgr->GetBoolDefault(MFKAnnounceWorldSuicide, true))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounceWorldSuicide, true))
 				sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
 
-			if (sConfigMgr->GetBoolDefault(MFKAnnounceGuildSuicide, false))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounceGuildSuicide, false))
 			{
 				Guild* guild = killer->GetGuild();
 				if (guild)
@@ -335,7 +335,7 @@ public:
 			}
 
 
-			if (sConfigMgr->GetBoolDefault(MFKAnnounceGroupSuicide, false))
+			if (sConfigMgr->GetOption<bool>(MFKAnnounceGroupSuicide, false))
 			{
 				Group* group = killer->GetGroup();
 				if (group)
