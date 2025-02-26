@@ -79,6 +79,7 @@ reward range of the group and an option to only reward the player that got the k
 #include "Chat.h"
 #include "Player.h"
 #include "Guild.h"
+#include "WorldSessionMgr.h"
 
 enum KillType
 {
@@ -112,7 +113,7 @@ public:
 	MoneyForKills() : PlayerScript("MoneyForKills") { }
 
 	// Announce Module
-	void OnLogin(Player *player) {
+	void OnPlayerLogin(Player *player) {
 		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
 		{
 			if (sConfigMgr->GetOption<bool>(MFKAnnounce, true))
@@ -123,7 +124,7 @@ public:
 	}
 
 	// Player Kill Reward
-	void OnPVPKill(Player* killer, Player* victim)
+	void OnPlayerPVPKill(Player* killer, Player* victim)
 	{
 		// If enabled...
 		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
@@ -169,7 +170,7 @@ public:
 	}
 
 	// Creature Kill Reward
-	void OnCreatureKill(Player* player, Creature* killed)
+	void OnPlayerCreatureKill(Player* player, Creature* killed)
 	{
 		// If enabled...
 		if (sConfigMgr->GetOption<bool>(MFKEnable, true))
@@ -300,7 +301,7 @@ public:
 			{
 				rewardMsg.append("|cff676767[ |cffFFFF00World |cff676767]|r:|cff4CFF00 ").append(killer->GetName()).append(" |cffFF0000has slain ");
 				rewardMsg.append(victim->GetName()).append(" earning a bounty of").append(rewardVal).append(".");
-				sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+				sWorldSessionMgr->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
 			}
 			break;
 		case KILLTYPE_DUNGEONBOSS:
@@ -316,7 +317,7 @@ public:
 			{
 				rewardMsg.append("|cffFF0000[ |cffFFFF00World |cffFF0000]|r:|cff4CFF00 ").append(killer->GetName());
 				rewardMsg.append("'s|r group triumphed victoriously over |CFF18BE00[").append(killed->GetName()).append("]|r !");
-				sWorld->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
+				sWorldSessionMgr->SendServerMessage(SERVER_MSG_STRING, rewardMsg.c_str());
 				rewardMsg.clear();
 			}
 			break;
@@ -328,7 +329,7 @@ public:
 			message.append(" met an untimely demise!");
 
 			if (sConfigMgr->GetOption<bool>(MFKAnnounceWorldSuicide, true))
-				sWorld->SendServerMessage(SERVER_MSG_STRING, message.c_str());
+				sWorldSessionMgr->SendServerMessage(SERVER_MSG_STRING, message.c_str());
 
 			if (sConfigMgr->GetOption<bool>(MFKAnnounceGuildSuicide, false))
 			{
