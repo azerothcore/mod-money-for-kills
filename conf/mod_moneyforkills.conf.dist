@@ -24,7 +24,7 @@ MFK.Announce.World.WorldBoss = 1
 # Enable player suicide announcements to display to the world
 # Default 1
 
-MFK.Announce.World.Suicide = 1
+MFK.Announce.World.Suicide = 0
 
 # Enable player suicide announcements to display to their guild
 # Default 0
@@ -38,12 +38,12 @@ MFK.Announce.Group.Suicide = 0
 # Enable PvP announcements
 # Default 1
 
-MFK.Announce.World.PvP = 1
+MFK.Announce.World.PvP = 0
 
 # Enable Group announcements for killing a dungeon boss
 # Default 1
 
-MFK.Announce.Group.DungeonBoss = 1
+MFK.Announce.Group.DungeonBoss = 0
 
 # Only allow the player with the killing blow to claim the bounty?
 # Default: 0 (All players receive the bounty)
@@ -76,5 +76,21 @@ MFK.PVP.CorpseLootPercent = 5
 
 MFK.Bounty.Kill.Multiplier = 10
 MFK.PVP.Kill.Multiplier = 20
-MFK.Bounty.DungeonBoss.Multiplier = 25
+MFK.Bounty.DungeonBoss.Multip lier = 25
 MFK.Bounty.WorldBoss.Multiplier = 20
+
+# Provide bonus or penalty multiplier to the amount taken based on proportional level difference
+# Calculation is KillerLevelDiff = VictimLevel / KillerLevel
+# Level 80 kills a level 40 the KillerLevelDiff = 0.5 i.e. CorpseLootPercent is reduced to 2.5%
+# Level 40 kills a level 80 the KillerLevelDiff = 2 i.e. CorpseLootPercent is increased to 10%
+# This has been set so no value can go over 100%.
+# Default: 1 for enable
+
+MFK.Killer.Level.Diff.Enable = 1 
+
+# Maximum Lootable value is the maximum percentage of a player's gold that can be taken in a single kill
+# This is to ensure that even with bonuses, the killerleveldiff does not lead to efficient gold farming.
+# Value should be a decimal between 0 and 1 and this has been set so no value can go over 100%
+# Default = 0.5
+
+MFK.Max.Gold.Threshold = 0.5
