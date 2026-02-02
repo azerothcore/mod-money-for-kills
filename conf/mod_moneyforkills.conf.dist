@@ -10,7 +10,7 @@
 MFK.Enable = 1
 
 # Announce the module when the player logs in?
-# Default: 1
+# Default: 0
 
 MFK.Announce = 0
 
@@ -22,7 +22,7 @@ MFK.Announce.World.WorldBoss = 1
 # It is recommended to only enable world suicide announcements if group and guild are both disabled and vice versa
 # as it can become spammy in some situations. Having all 3 enabled would display 3 messages for some people.
 # Enable player suicide announcements to display to the world
-# Default 1
+# Default 0
 
 MFK.Announce.World.Suicide = 0
 
@@ -36,12 +36,12 @@ MFK.Announce.Guild.Suicide = 0
 MFK.Announce.Group.Suicide = 0
 
 # Enable PvP announcements
-# Default 1
+# Default 0
 
 MFK.Announce.World.PvP = 0
 
 # Enable Group announcements for killing a dungeon boss
-# Default 1
+# Default 0
 
 MFK.Announce.Group.DungeonBoss = 0
 
