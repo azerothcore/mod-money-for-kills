@@ -127,6 +127,15 @@ public:
 		}
 	}
 
+	void OnPlayerKilledByCreature(Creature* killer, Player* killed){
+		//Check if the owner of the pet is a player	
+        Player* petOwner = killer->GetOwner()->ToPlayer();
+		if(!petOwner){
+			return;
+		}
+		//Divert to OnPlayerPVPKill in MoneyForKills using the player
+		MoneyForKills::OnPlayerPVPKill(petOwner,killed);
+	}
 	// Player Kill Reward
 	void OnPlayerPVPKill(Player* killer, Player* victim)
 	{
